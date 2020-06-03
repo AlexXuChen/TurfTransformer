@@ -22,4 +22,27 @@ line => line.map(reading => _.omit(reading, 'assetId')));
 
 const calculateDistance = (first, second) => turf.distance(turf.point(first), turf.point(second))
 
-module.exports = { transformData, groupByAssetId, sortByDate, convertToArray, calculateDistance }
+const findClosestPathCoords = (coords, segments) => {
+    const distances = segments.map(segment => {
+        return calculateDistance(coords, segment)
+    })
+    const minDistance = Math.min.apply(Math, distances)
+    return segments.slice(segments.indexOf(minDistance))
+}
+
+const buildNewPath = (timestamp, coordinates) => {
+    return{
+        timestamp, 
+        plowing: true,
+        turfPath: {
+            type: 'Feature',
+            properties: {},
+            geometry: { 
+                type: 'LineString', 
+                coordinates 
+            }
+        }
+    }
+}
+
+module.exports = { transformData, groupByAssetId, sortByDate, convertToArray, calculateDistance, findClosestPathCoords, buildNewPath }

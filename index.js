@@ -36,9 +36,18 @@ Object.keys(groupedIds).map((key) => {
                         const distanceLatestToLast = transformer.calculateDistance(latestSegment.geometry.coordinates[0], lastIntersection.coordinates)
                         const distanceCurrentToLast = transformer.calculateDistance(oldSegment.geometry.coordinates[0], lastIntersection.coordinates)
                         const lastDistanceDifference = distanceLatestToLast - distanceCurrentToLast
-                        if (Math.abs(lastDistanceDifference) < 0.01) {
-                            
+                        // console.log("pushNewPath -> oldSegment", oldSegment)
+                        // console.log("pushNewPath -> lastIntersection", lastIntersection)
+                        const closestPath = transformer.findClosestPathCoords(lastIntersection.coordinates, oldSegment.geometry.coordinates)
+
+                        if (closestPath.length == 1) {
+                            closestPath.push(latestSegment.geometry.coordinates[0])
                         }
+                        const newPath = transformer.buildNewPath(pathArray[j].timestamp, closestPath)
+                        // console.log("pushNewPath -> pathArray", pathArray)
+                        // console.log("pushNewPath -> newPath", newPath)
+                        pathArray.push(closestPath)
+                        console.log("FINAL pushNewPath -> pathArray", pathArray)
                     }
                 }
             }
@@ -46,47 +55,12 @@ Object.keys(groupedIds).map((key) => {
     }
 
     const finalPaths = []
-    
     let count = 0
     for(let i = 0; i < currentGroup.length; i++) {
         pushNewPath(finalPaths, currentGroup[i])
-        // for (let j = i + 1; j < currentGroup.length; j++) {
-        //     const latestSegment = currentGroup[i].turfPath
-        //     let currentSegment = currentGroup[j].turfPath
-        //     const intersection = turf.lineIntersect(latestSegment, currentSegment)
-        //     if (intersection.features.length > 2) {
-        //         const firstIntersection = intersection.features[0].geometry
-        //         const lastIntersection = intersection.features[intersection.features.length - 1].geometry
-                
-        //         const distanceLatestToFirst = transformer.calculateDistance(latestSegment.geometry.coordinates[0], firstIntersection.coordinates)
-        //         const distanceCurrentToFirst = transformer.calculateDistance(currentSegment.geometry.coordinates[0], firstIntersection.coordinates)
-        //         const firstDistanceDifference = distanceLatestToFirst - distanceCurrentToFirst
-
-        //         if (Math.abs(firstDistanceDifference) < 0.01) {
-        //             const distanceLatestToLast = transformer.calculateDistance(latestSegment.geometry.coordinates[0], lastIntersection.coordinates)
-        //             const distanceCurrentToLast = transformer.calculateDistance(currentSegment.geometry.coordinates[0], lastIntersection.coordinates)
-        //             const lastDistanceDifference = distanceLatestToLast - distanceCurrentToLast
-        //             if (Math.abs(lastDistanceDifference) < 0.01) {
-                        
-        //             }
-        //         }
-
-        //         count++
-        //     }
-        // }
+        count++
     }
     console.log(count)
-        
-
-    // for(let i in currentGroup) {
-    //     if(i > 0){
-    //         for (let j = 0; j < i; j++) {
-    //             const intersection = turf.lineIntersect(currentGroup[j].turfPath, currentGroup[i].turfPath)
-    //             console.log(currentGroup[i].turfPath, intersection)
-    //         }
-    //     }
-    // }
-    // console.log(key)
 })
 
 app.get('/', (req, res) => res.json(groupedIds))
