@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const turf = require('@turf/turf')
 
 const transformData = () => {
 
@@ -19,4 +20,6 @@ const groupByAssetId = (lines) => {
 line => line.map(reading => _.omit(reading, 'assetId')));
 }
 
-module.exports = { transformData, groupByAssetId, sortByDate, convertToArray }
+const calculateDistance = (first, second) => turf.distance(turf.point(first), turf.point(second))
+
+module.exports = { transformData, groupByAssetId, sortByDate, convertToArray, calculateDistance }

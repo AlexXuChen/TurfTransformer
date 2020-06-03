@@ -16,16 +16,64 @@ Object.keys(groupedIds).map((key) => {
         currentGroup[key].turfPath = turf.lineString(turfPath)
       }
     
-    let count = 0
-    for(let i = 0; i < currentGroup.length; i++) {
-        for (let j = i + 1; j < currentGroup.length; j++) {
-            const intersection = turf.lineIntersect(currentGroup[i].turfPath, currentGroup[j].turfPath)
-            // console.log(intersection)
-            if (intersection.features.length > 2) {
-                console.log(intersection)
-                count++
+    const pushNewPath = (pathArray, currentSegment) => {
+        if(!pathArray.length) {
+            pathArray.push(currentSegment)
+        }else {
+            for(let j = 0; j < pathArray.length; j++) {
+                const latestSegment = currentSegment.turfPath
+                let oldSegment = pathArray[j].turfPath
+                const intersection = turf.lineIntersect(latestSegment, oldSegment)
+                if (intersection.features.length > 2) {
+                    const firstIntersection = intersection.features[0].geometry
+                    const lastIntersection = intersection.features[intersection.features.length - 1].geometry
+                    
+                    const distanceLatestToFirst = transformer.calculateDistance(latestSegment.geometry.coordinates[0], firstIntersection.coordinates)
+                    const distanceCurrentToFirst = transformer.calculateDistance(oldSegment.geometry.coordinates[0], firstIntersection.coordinates)
+                    const firstDistanceDifference = distanceLatestToFirst - distanceCurrentToFirst
+    
+                    if (Math.abs(firstDistanceDifference) < 0.01) {
+                        const distanceLatestToLast = transformer.calculateDistance(latestSegment.geometry.coordinates[0], lastIntersection.coordinates)
+                        const distanceCurrentToLast = transformer.calculateDistance(oldSegment.geometry.coordinates[0], lastIntersection.coordinates)
+                        const lastDistanceDifference = distanceLatestToLast - distanceCurrentToLast
+                        if (Math.abs(lastDistanceDifference) < 0.01) {
+                            
+                        }
+                    }
+                }
             }
         }
+    }
+
+    const finalPaths = []
+    
+    let count = 0
+    for(let i = 0; i < currentGroup.length; i++) {
+        pushNewPath(finalPaths, currentGroup[i])
+        // for (let j = i + 1; j < currentGroup.length; j++) {
+        //     const latestSegment = currentGroup[i].turfPath
+        //     let currentSegment = currentGroup[j].turfPath
+        //     const intersection = turf.lineIntersect(latestSegment, currentSegment)
+        //     if (intersection.features.length > 2) {
+        //         const firstIntersection = intersection.features[0].geometry
+        //         const lastIntersection = intersection.features[intersection.features.length - 1].geometry
+                
+        //         const distanceLatestToFirst = transformer.calculateDistance(latestSegment.geometry.coordinates[0], firstIntersection.coordinates)
+        //         const distanceCurrentToFirst = transformer.calculateDistance(currentSegment.geometry.coordinates[0], firstIntersection.coordinates)
+        //         const firstDistanceDifference = distanceLatestToFirst - distanceCurrentToFirst
+
+        //         if (Math.abs(firstDistanceDifference) < 0.01) {
+        //             const distanceLatestToLast = transformer.calculateDistance(latestSegment.geometry.coordinates[0], lastIntersection.coordinates)
+        //             const distanceCurrentToLast = transformer.calculateDistance(currentSegment.geometry.coordinates[0], lastIntersection.coordinates)
+        //             const lastDistanceDifference = distanceLatestToLast - distanceCurrentToLast
+        //             if (Math.abs(lastDistanceDifference) < 0.01) {
+                        
+        //             }
+        //         }
+
+        //         count++
+        //     }
+        // }
     }
     console.log(count)
         
