@@ -1,6 +1,7 @@
 const express = require('express')
 const turf = require('@turf/turf')
-const testDataSample1 = require('./data/data2')
+// const testDataSample1 = require('./data/data2')
+const testDataSample1 = require('./data/plowpath')
 const transformer = require('./src/transformer')
 
 const app = express()
@@ -15,7 +16,6 @@ const requestHandler = async (req, res) => {
     const optimizedPath = Object.keys(groupedIds).map((key) => {
         const currentGroup = groupedIds[key]
         transformer.addTurfPath(currentGroup)
-        
         const pushNewPath = (pathArray, currentSegment) => {
             if(!pathArray.length) {
                 pathArray.push(currentSegment)
@@ -32,26 +32,26 @@ const requestHandler = async (req, res) => {
                         const distanceLatestToFirst = transformer.calculateDistance(latestSegment.geometry.coordinates[0], firstIntersection.coordinates)
                         const distanceCurrentToFirst = transformer.calculateDistance(oldSegment.geometry.coordinates[0], firstIntersection.coordinates)
                         const firstDistanceDifference = distanceLatestToFirst - distanceCurrentToFirst
-        
+
                         if (Math.abs(firstDistanceDifference) < 0.01) { //IF: latest Path are closed to old Path
                             //1. find last intersection
                             //2. get segment between intersection and old Path
-                            console.log("old path end is far than latest")
+                            // console.log("old path end is far than latest")
                             const closestPath = transformer.slicePathFromIntersectionToEnd(lastIntersection.coordinates, oldSegment.geometry.coordinates)
-                            const newPath = transformer.buildNewPath(currentSegment.timestamp, closestPath)
+                            const newPath = transformer.buildNewPath(currentSegment.timestamp, closestPath, currentSegment.assetId)
                             pathArray.push(newPath)
-                            cursor ++                            
+                            cursor++                            
                         }else {
-                            console.log("old path start is far than latest and get path from start to intersection")
+                            // console.log("old path start is far than latest and get path from start to intersection")
                             let closestPath = transformer.slicePathFromStartToIntersection(firstIntersection.coordinates, oldSegment.geometry.coordinates)
-                            console.log("pushNewPath -> closestPath", closestPath)
-                            let newPath = transformer.buildNewPath(currentSegment.timestamp, closestPath)
+                            // console.log("pushNewPath -> closestPath", closestPath)
+                            let newPath = transformer.buildNewPath(currentSegment.timestamp, closestPath, currentSegment.assetId)
                             pathArray.push(newPath)
-                            cursor ++
+                            cursor++
                             closestPath = transformer.slicePathFromIntersectionToEnd(lastIntersection.coordinates, oldSegment.geometry.coordinates)
-                            newPath = transformer.buildNewPath(currentSegment.timestamp, closestPath)
+                            newPath = transformer.buildNewPath(currentSegment.timestamp, closestPath, currentSegment.assetId)
                             pathArray.push(newPath)
-                            cursor ++                
+                            cursor++                
                         }
                     }
                 }
@@ -65,12 +65,18 @@ const requestHandler = async (req, res) => {
             count++
         }
         console.log(count)
+        for(let i = 0; i < finalPaths.length; i++) {
+            finalPaths[i].readings = transformer.convertToReading(finalPaths[i].turfPath.geometry.coordinates)
+            delete finalPaths[i].turfPath
+        }
         return finalPaths
     })
-
-  
+    const finalPath = optimizedPath.reduce((prev, curr) => {
+        return prev.concat(curr)
+    })
+    console.log("requestHandler -> optimizedPath", optimizedPath.length)
     res.status(200)
-    res.json(optimizedPath)
+    res.json(finalPath)
 }
 app.get('/', requestHandler)
 app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`))

@@ -47,8 +47,9 @@ const slicePathFromStartToIntersection = (intersectionCoords, segmentsCoords) =>
     return newPath
 }
 
-const buildNewPath = (timestamp, coordinates) => {
+const buildNewPath = (timestamp, coordinates, assetId) => {
     return{
+        assetId,
         timestamp, 
         plowing: true,
         turfPath: {
@@ -69,6 +70,18 @@ const addTurfPath = (currentGroup) => {
     }
 }
 
+const convertToReading = (coordinates) => {
+    const readings = []
+    for(let i in coordinates) {
+        const coordinate = coordinates[i]
+        readings.push({
+            latitude: coordinate[0],
+            longitude: coordinate[1]
+        })
+    }
+    return readings
+}
+
 module.exports = { 
     transformData, 
     groupByAssetId,
@@ -78,5 +91,6 @@ module.exports = {
     slicePathFromIntersectionToEnd,
     slicePathFromStartToIntersection,
     buildNewPath,
-    addTurfPath
+    addTurfPath,
+    convertToReading
 }
