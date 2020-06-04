@@ -36,11 +36,22 @@ const requestHandler = async (req, res) => {
                         if (Math.abs(firstDistanceDifference) < 0.01) { //IF: latest Path are closed to old Path
                             //1. find last intersection
                             //2. get segment between intersection and old Path
-
-                            const closestPath = transformer.slicePathFromIntersection(lastIntersection.coordinates, oldSegment.geometry.coordinates)
-
+                            console.log("old path end is far than latest")
+                            const closestPath = transformer.slicePathFromIntersectionToEnd(lastIntersection.coordinates, oldSegment.geometry.coordinates)
                             const newPath = transformer.buildNewPath(currentSegment.timestamp, closestPath)
                             pathArray.push(newPath)
+                            cursor ++                            
+                        }else {
+                            console.log("old path start is far than latest and get path from start to intersection")
+                            let closestPath = transformer.slicePathFromStartToIntersection(firstIntersection.coordinates, oldSegment.geometry.coordinates)
+                            console.log("pushNewPath -> closestPath", closestPath)
+                            let newPath = transformer.buildNewPath(currentSegment.timestamp, closestPath)
+                            pathArray.push(newPath)
+                            cursor ++
+                            closestPath = transformer.slicePathFromIntersectionToEnd(lastIntersection.coordinates, oldSegment.geometry.coordinates)
+                            newPath = transformer.buildNewPath(currentSegment.timestamp, closestPath)
+                            pathArray.push(newPath)
+                            cursor ++                
                         }
                     }
                 }

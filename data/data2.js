@@ -4,6 +4,10 @@ module.exports = [{
     "plowing": true,
     "readings": [
         {
+            "latitude": 44.239644,
+            "longitude": -76.637865
+        },
+        {
             "latitude": 44.245756715139265,
             "longitude": -76.64132287536808
         },
