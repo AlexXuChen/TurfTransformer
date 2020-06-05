@@ -7,17 +7,17 @@ const transformData = () => {
 
 const convertToArray = (paths) => {
     return paths.map(path => [path.latitude, path.longitude])
-  }
+}
 
 const sortByDate = (vehiclePath) => {
-    vehiclePath.sort(function(x, y){
-          return new Date(y.timestamp).getTime() - new Date(x.timestamp).getTime();
-      })
+    vehiclePath.sort(function (x, y) {
+        return new Date(y.timestamp).getTime() - new Date(x.timestamp).getTime();
+    })
 }
 
 const groupByAssetId = (lines) => {
     return _.mapValues(_.groupBy(lines, 'assetId'),
-line => line.map(reading => _.omit(reading, 'assetId')));
+        line => line.map(reading => _.omit(reading, 'assetId')));
 }
 
 const calculateDistance = (first, second) => turf.distance(turf.point(first), turf.point(second))
@@ -30,7 +30,7 @@ const slicePathFromIntersectionToEnd = (intersectionCoords, segmentsCoords) => {
 
     const newPath = segmentsCoords.slice(distances.indexOf(minDistance))
 
-    if(newPath.length === 1) newPath.unshift(intersectionCoords)
+    if (newPath.length === 1) newPath.unshift(intersectionCoords)
 
     return newPath
 }
@@ -42,22 +42,21 @@ const slicePathFromStartToIntersection = (intersectionCoords, segmentsCoords) =>
 
     const newPath = segmentsCoords.slice(0, distances.indexOf(minDistance) + 1)
 
-    if(newPath.length === 1) newPath.push(intersectionCoords)
+    if (newPath.length === 1) newPath.push(intersectionCoords)
 
     return newPath
 }
 
-const buildNewPath = (timestamp, coordinates, assetId) => {
-    return{
-        assetId,
-        timestamp, 
+const buildNewPath = (timestamp, coordinates) => {
+    return {
+        timestamp,
         plowing: true,
         turfPath: {
             type: 'Feature',
             properties: {},
-            geometry: { 
-                type: 'LineString', 
-                coordinates 
+            geometry: {
+                type: 'LineString',
+                coordinates
             }
         }
     }
@@ -72,7 +71,7 @@ const addTurfPath = (currentGroup) => {
 
 const convertToReading = (coordinates) => {
     const readings = []
-    for(let i in coordinates) {
+    for (let i in coordinates) {
         const coordinate = coordinates[i]
         readings.push({
             latitude: coordinate[0],
@@ -82,8 +81,8 @@ const convertToReading = (coordinates) => {
     return readings
 }
 
-module.exports = { 
-    transformData, 
+module.exports = {
+    transformData,
     groupByAssetId,
     sortByDate,
     convertToArray,
